@@ -2,7 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // The API key and default endpoint for the News API
 export const API_KEY = `97d4da96e9c349c6a80fb1426cea7437`;
-export const endpoint = `https://newsapi.org/v2/top-headlines`;
+export const BASE_URL = `https://newsapi.org/v2/top-headlines`;
+export const DEFAULT_COUNTRY = "ng";
 
 // The default country for the News API endpoint
 export const country = "ng";
