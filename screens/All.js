@@ -7,10 +7,11 @@ import {
   Image,
   Spinner,
 } from "native-base";
-import { getNews } from "../services/services";
+import { getNews, searchNews } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
+import { SearchBar } from "@rneui/themed";
 
 export default function All() {
   const [allStore, setAllStore] = useState({});
@@ -39,6 +40,23 @@ export default function All() {
 
     fetchData();
   }, []);
+
+  const [searchLoad, setSearchLoad] = useState(false);
+  async function updateSearch(search) {
+    setSearchLoad(true);
+    try {
+      const data = await searchNews(search);
+      const newAllStore = { general: data };
+      setAllStore(newAllStore);
+      await storeData(newAllStore);
+      console.log("search updated");
+    } catch (error) {
+      alert(error);
+    }
+    setSearchLoad(false);
+  }
+
+  var search = "general";
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -103,12 +121,23 @@ export default function All() {
 
   return (
     <NativeBaseProvider>
+      <View>
+        <SearchBar
+          placeholder="Type Here..."
+          onChangeText={updateSearch}
+          showLoading={searchLoad}
+          lightTheme={true}
+          platform={"ios"}
+        />
+      </View>
       <View height={850}>
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}
             renderItem={renderItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => {
+              item.title;
+            }}
             onRefresh={onRefresh}
             refreshing={refreshing}
           />

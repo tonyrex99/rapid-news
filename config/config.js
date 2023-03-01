@@ -12,7 +12,7 @@ export const country = "ng";
 export async function getEndpoint() {
   try {
     const jsonValue = await AsyncStorage.getItem("config");
-    console.log("Endpoint read success:", jsonValue);
+    console.log("Endpoint read success:");
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch (error) {
     console.log("Endpoint reading error:", error);
@@ -26,7 +26,7 @@ export async function storeEndpoint(value) {
     value.country = value.country || "ng"; // set default country if not provided
     const jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem("config", jsonValue);
-    console.log("Endpoint saved success:", jsonValue);
+    console.log("Endpoint saved success:");
   } catch (error) {
     console.log("Endpoint saving error:", error);
     throw error;
@@ -38,9 +38,33 @@ export async function storeData(value) {
   try {
     const jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem("news", jsonValue);
-    console.log("Data saved success:", jsonValue);
+    console.log("Data saved success:");
   } catch (error) {
     console.log("Data saving error:", error);
+    throw error;
+  }
+}
+
+// stores the user set API KEY to AsyncStorage
+export async function storeApi(value) {
+  try {
+    const jsonValue = JSON.stringify(value);
+    await AsyncStorage.setItem("newsApiKey", jsonValue);
+    console.log("api saved success:");
+  } catch (error) {
+    console.log("api saving error:", error);
+    throw error;
+  }
+}
+
+//Get api key from AsyncStorage
+export async function getApi() {
+  try {
+    const jsonValue = await AsyncStorage.getItem("newsApiKey");
+    console.log("api read success:");
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (error) {
+    console.log("api reading error:", error);
     throw error;
   }
 }
@@ -49,7 +73,7 @@ export async function storeData(value) {
 export async function getData() {
   try {
     const jsonValue = await AsyncStorage.getItem("news");
-    console.log("Data read success:", jsonValue);
+    console.log("Data read success:");
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch (error) {
     console.log("Data reading error:", error);

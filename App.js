@@ -22,7 +22,7 @@ function Myhome() {
   return (
     <Tab.Navigator
       tabBarPosition="bottom"
-      lazy="true"
+      lazy={true}
       tabBarOptions={{
         showLabel: false,
         activeTintColor: "blue",
@@ -135,5 +135,5 @@ const styles = StyleSheet.create({
   headerStyle: { height: 100 },
   headerTitleStyle: { fontSize: 20 },
   label: { fontSize: 10, fontWeight: "bold" },
-  indicator: { visible: false },
+  indicator: { backgroundColor: "transparent", height: 0 },
 });

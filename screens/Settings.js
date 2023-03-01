@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { getEndpoint, storeEndpoint } from "../config/config";
 import { Picker } from "@react-native-picker/picker";
 import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
-
+import { getApi, storeApi, API_KEY } from "../config/config";
+console.log("aapi key is ", getApi().api);
 const countries = [
   { title: "Argentina", id: "ar" },
   { title: "Australia", id: "au" },
@@ -61,17 +68,32 @@ const countries = [
 ];
 
 const SettingsScreen = () => {
+  var convertSelectedCountry;
+  var countryObject;
   const defaultSettings = {
     endpoint: "https://newsapi.org/v2/top-headlines",
     country: "ng",
   };
   const [endpoint, setEndpoint] = useState(getEndpoint().endpoint);
+  const KeyAsync = getApi().api;
+  console.log("async key is", KeyAsync);
+  const [api_key, setApi_key] = useState(KeyAsync);
 
   const [selectedCountry, setSelectedCountry] = useState("");
+  function CountrySetter(item) {
+    if (item) {
+      setSelectedCountry(item.title);
+      console.log(item.title);
+    }
+  }
 
   const handleSubmit = () => {
-    const UserProfile = { endpoint: endpoint, country: convertSelectedCountry };
+    const UserProfile = { endpoint: endpoint, country: selectedCountry };
+    console.log("Userprofile settings to be saved", UserProfile);
     storeEndpoint(UserProfile);
+    const UserApi = { api: api_key };
+    console.log("api key to be stored ", UserApi);
+    storeApi(UserApi);
   };
 
   const handleSaveSettings = () => {
@@ -80,8 +102,11 @@ const SettingsScreen = () => {
 
   const handleResetSettings = () => {
     storeEndpoint(defaultSettings);
-    setEndpoint(defaultSettings.endpoint);
-    setSelectedCountry(defaultSettings.country);
+    console.log("Settings reset");
+    console.log("edpoint reseted to", defaultSettings);
+    const defaultApi_key = { api: API_KEY };
+    storeApi(defaultApi_key);
+    console.log("default api key saved is", defaultApi_key);
   };
 
   const handleEndpointChange = (value) => {
@@ -98,19 +123,15 @@ const SettingsScreen = () => {
     top: defaultSettings.endpoint,
     source: "https://newsapi.org/v2/top-headlines/sources",
   };
-  var convertSelectedCountry;
-  var countryObject;
-  const OpenURLButton = ({ url }) => {
-    console.log(url);
-
-    // countryObject = url;
-    //convertSelectedCountry = url.title;
-  };
 
   return (
     <>
       <View style={styles.container}>
         <Text style={styles.title}>Settings</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>API Key</Text>
+          <TextInput value={api_key} onChangeText={setApi_key} />
+        </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>API Endpoint</Text>
           <Picker
@@ -128,11 +149,10 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Country</Text>
           <AutocompleteDropdown
-            onSelectItem={setSelectedCountry}
+            onSelectItem={CountrySetter}
             initialValue={initialValue}
             dataSet={countries}
           />
-          <OpenURLButton url={selectedCountry} />
         </View>
         <TouchableOpacity style={styles.button} onPress={handleSaveSettings}>
           <Text style={styles.buttonText}>Save</Text>
