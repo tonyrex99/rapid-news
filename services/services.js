@@ -10,6 +10,25 @@ import {
   storeApi,
   getApi,
 } from "../config/config";
+import { useColorScheme } from "react-native";
+
+const Colors = {
+  light: {
+    background: "white",
+    text: "black",
+  },
+  dark: {
+    background: "black",
+    text: "white",
+  },
+};
+
+export const useThemeColors = () => {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme];
+
+  return colors;
+};
 
 /**
 

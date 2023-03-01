@@ -10,6 +10,8 @@ import { getEndpoint, storeEndpoint } from "../config/config";
 import { Picker } from "@react-native-picker/picker";
 import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 import { getApi, storeApi, API_KEY } from "../config/config";
+
+import { useNavigation } from "@react-navigation/native";
 console.log("aapi key is ", getApi().api);
 const countries = [
   { title: "Argentina", id: "ar" },
@@ -123,6 +125,16 @@ const SettingsScreen = () => {
     top: defaultSettings.endpoint,
     source: "https://newsapi.org/v2/top-headlines/sources",
   };
+  const navigation = useNavigation();
+  const webfind = (item) => {
+    navigation.navigate("WebFinder", {
+      superLink: item,
+    });
+  };
+
+  function handleApiFetch() {
+    webfind("https://newsapi.org/register");
+  }
 
   return (
     <>
@@ -159,6 +171,10 @@ const SettingsScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleResetSettings}>
           <Text style={styles.buttonText}>Reset to Default</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.apiButton} onPress={handleApiFetch}>
+          <Text style={styles.buttonText}>GET MY API KEY</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -198,6 +214,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
+  },
+  apiButton: {
+    backgroundColor: "#007a00",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginTop: 10,
+
+    justifyContent: "center",
   },
   buttonText: {
     color: "#fff",

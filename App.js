@@ -1,6 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { StyleSheet, useColorScheme } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -13,9 +12,8 @@ import SettingsScreen from "./screens/Settings";
 import NewsPane from "./screens/NewsPane";
 import WebFinder from "./screens/WebFinder";
 import { Icon } from "@rneui/themed";
-//import AsyncStorage from "@react-native-community/async-storage";
-//import { services, getData, storeData } from "./services/services";
-const Tab = createMaterialTopTabNavigator(); //createBottomTabNavigator();
+
+const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function Myhome() {

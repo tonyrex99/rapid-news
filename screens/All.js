@@ -7,18 +7,23 @@ import {
   Image,
   Spinner,
 } from "native-base";
-import { getNews, searchNews } from "../services/services";
+import { getNews, searchNews, useThemeColors } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
 import { SearchBar } from "@rneui/themed";
+import { useColorScheme } from "react-native";
 
 export default function All() {
+  const colorScheme = useColorScheme();
   const [allStore, setAllStore] = useState({});
-
+  const colors = useThemeColors();
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setTheme(resolveTheme());
+        console.log("resolvethem is", resolveTheme());
+        console.log("resolvethem is", typeof resolveTheme());
         const storedData = await getData();
         if (storedData && storedData.general) {
           console.log("allstore worked and was read");
@@ -118,6 +123,19 @@ export default function All() {
       </View>
     </TouchableOpacity>
   );
+  const flatlistStyle = StyleSheet.create({
+    container: { backgroundColor: colors.background },
+  });
+  const [Theme, setTheme] = useState(true);
+  function resolveTheme() {
+    var searchtheme = colorScheme;
+    console.log("colorscheme is" + searchtheme);
+    if (searchtheme == "light") {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   return (
     <NativeBaseProvider>
@@ -126,13 +144,14 @@ export default function All() {
           placeholder="Type Here..."
           onChangeText={updateSearch}
           showLoading={searchLoad}
-          lightTheme={true}
+          lightTheme={Theme}
           platform={"ios"}
         />
       </View>
       <View height={850}>
         {newsData.length > 1 ? (
           <FlatList
+            contentContainerStyle={flatlistStyle.container}
             data={newsData}
             renderItem={renderItem}
             keyExtractor={(item) => {
