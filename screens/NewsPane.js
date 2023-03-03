@@ -6,13 +6,15 @@ import {
   StyleSheet,
   Linking,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { Image, NativeBaseProvider, ScrollView } from "native-base";
 
 import moment from "moment";
 
 import { useNavigation } from "@react-navigation/native";
-
+const { width } = Dimensions.get("window");
+const containerWidth = width / 3 + width / 3 / 2;
 export default function NewsPane({ route }) {
   const navigation = useNavigation();
   const webfind = (item) => {
@@ -35,11 +37,11 @@ export default function NewsPane({ route }) {
     }, [url]);
 
     return (
-      <>
+      <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handlePress}>
           <Text style={styles.buttonText}>Read More</Text>
         </TouchableOpacity>
-      </>
+      </View>
     );
   };
 
@@ -70,17 +72,26 @@ const styles = StyleSheet.create({
   newsContainer: {
     padding: 10,
   },
-
+  buttonContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   button: {
     backgroundColor: "#007aff",
-    padding: 10,
-    borderRadius: 5,
+    padding: 20,
+    borderRadius: 20,
     marginBottom: 10,
+    width: containerWidth,
   },
   buttonText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 20,
   },
   title: {
     fontSize: 18,

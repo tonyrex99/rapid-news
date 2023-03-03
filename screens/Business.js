@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Button } from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
@@ -22,15 +22,15 @@ export default function Business() {
         if (storedData && storedData.business) {
           console.log("allstore worked and was read");
           setAllStore(storedData);
-          console.log(storedData.business);
+          //  console.log(storedData.business);
         } else {
           console.log("allstore void or not read time to write");
           const data = await getNews("business");
           const newAllStore = { business: data };
           setAllStore(newAllStore);
-          console.log("allstore data " + newAllStore.business.title);
+          // console.log("allstore data " + newAllStore.business.title);
           await storeData(newAllStore);
-          console.log("allstore data after store" + newAllStore.business.title);
+          //console.log("allstore data after store" + newAllStore.business.title);
         }
       } catch (error) {
         alert(error);
@@ -72,7 +72,7 @@ export default function Business() {
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
     if (allStore && allStore.business) {
-      console.log("async get " + allStore.business);
+      //console.log("async get " + allStore.business);
       setNewsData(allStore.business);
     }
   }, [allStore]);
