@@ -20,18 +20,24 @@ function Myhome() {
   return (
     <Tab.Navigator
       tabBarPosition="bottom"
-      lazy={true}
-      tabBarOptions={{
-        showLabel: false,
-        activeTintColor: "blue",
-        allowFontScaling: true,
-        inactiveTintColor: "black",
-        labelStyle: styles.label,
-        indicatorStyle: styles.indicator,
-        tabStyle: {
+      screenOptions={{
+        tabBarActiveTintColor: "blue",
+        tabBarInactiveTintColor: "black",
+        tabBarShowLabel: false,
+        tabBarAllowFontScaling: true,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "bold",
+        },
+        tabBarItemStyle: {
           padding: 0,
           marginHorizontal: 2,
         },
+        tabBarIndicatorStyle: {
+          backgroundColor: "transparent",
+          height: 0,
+        },
+        tabBarLazy: true,
       }}
     >
       <Tab.Screen

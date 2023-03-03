@@ -1,6 +1,12 @@
 import React, { useCallback } from "react";
-import { Alert, View, Text, StyleSheet, Linking, Button } from "react-native";
-import { WebView } from "react-native-webview";
+import {
+  Alert,
+  View,
+  Text,
+  StyleSheet,
+  Linking,
+  TouchableOpacity,
+} from "react-native";
 import { Image, NativeBaseProvider, ScrollView } from "native-base";
 
 import moment from "moment";
@@ -30,7 +36,9 @@ export default function NewsPane({ route }) {
 
     return (
       <>
-        <Button title="Read More" onPress={handlePress} />
+        <TouchableOpacity style={styles.button} onPress={handlePress}>
+          <Text style={styles.buttonText}>Read More</Text>
+        </TouchableOpacity>
       </>
     );
   };
@@ -61,6 +69,18 @@ export default function NewsPane({ route }) {
 const styles = StyleSheet.create({
   newsContainer: {
     padding: 10,
+  },
+
+  button: {
+    backgroundColor: "#007aff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
   title: {
     fontSize: 18,

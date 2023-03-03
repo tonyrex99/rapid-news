@@ -85,12 +85,27 @@ export async function getNews(category = "general") {
   }
 }
 
-export async function searchNews(category = "general") {
+// Create a new Date object
+var currentDate = new Date();
+
+// Get the year, month, and day from the Date object
+var year = currentDate.getFullYear();
+var month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+var day = ("0" + currentDate.getDate()).slice(-2);
+
+// Combine the year, month, and day into the desired format
+var formattedDate = year + "-" + month + "-" + day;
+export async function searchNews(
+  searchQuery = "general",
+  startDate = formattedDate,
+  endDate = formattedDate
+  //sortBy = "relevancy"
+) {
   try {
     // search news api for a category
 
     const response = await axios.get(
-      `https://newsapi.org/v2/everything?q=${category}`,
+      `https://newsapi.org/v2/everything?q=${searchQuery}&from=${startDate}&to=${endDate}`, //&sortBy=${sortBy}`,
       {
         headers: {
           "X-API-KEY": CURRENT_API_KEY,

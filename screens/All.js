@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Button } from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
 import { SearchBar } from "@rneui/themed";
 import { useColorScheme } from "react-native";
-
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 export default function All() {
   const colorScheme = useColorScheme();
   const [allStore, setAllStore] = useState({});
@@ -47,10 +47,26 @@ export default function All() {
   }, []);
 
   const [searchLoad, setSearchLoad] = useState(false);
+
+  const [searchValue, setSearchValue] = useState("");
+  const [startDate, setStartDate] = useState(formattedDate);
+  // Create a new Date object
+  var currentDate = new Date();
+
+  // Get the year, month, and day from the Date object
+
+  // Combine the year, month, and day into the desired format
+  var formattedDate = moment(currentDate).format("YYYY-DD-MM");
   async function updateSearch(search) {
     setSearchLoad(true);
+    setSearchValue(search);
     try {
-      const data = await searchNews(search);
+      const data = await searchNews(
+        search,
+        startDate,
+        (endDate = startDate)
+        //  (sortBy = "relevancy")
+      );
       const newAllStore = { general: data };
       setAllStore(newAllStore);
       await storeData(newAllStore);
@@ -58,6 +74,7 @@ export default function All() {
     } catch (error) {
       alert(error);
     }
+
     setSearchLoad(false);
   }
 
@@ -100,6 +117,8 @@ export default function All() {
     }
   }, [allStore]);
 
+  const [openDateModal, setOpenDateModal] = useState(false);
+  const [modalDate, setModalDate] = useState(new Date());
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navfind(item)}>
       <View>
@@ -136,7 +155,22 @@ export default function All() {
       return false;
     }
   }
+  const handleDateConfirm = (date) => {
+    var finalDate = moment(currentDate).format("YYYY-DD-MM");
+    setStartDate(finalDate);
+    hideDatePicker();
+  };
+  const hideDatePicker = () => {
+    setOpenDateModal(false);
+  };
 
+  const handleFilterClick = (selectedFilter) => {
+    // Toggle filter
+    setActiveFilter((prevFilter) =>
+      prevFilter === selectedFilter ? null : selectedFilter
+    );
+    setFilter(selectedFilter);
+  };
   return (
     <NativeBaseProvider>
       <View>
@@ -146,8 +180,19 @@ export default function All() {
           showLoading={searchLoad}
           lightTheme={Theme}
           platform={"ios"}
+          value={searchValue}
+        />
+
+        <Button title="From" onPress={() => setOpenDateModal(true)} />
+        <Button title="to" onPress={() => setOpenDateModal(true)} />
+        <DateTimePickerModal
+          isVisible={openDateModal}
+          mode="date"
+          onConfirm={handleDateConfirm}
+          onCancel={hideDatePicker}
         />
       </View>
+
       <View height={850}>
         {newsData.length > 1 ? (
           <FlatList
@@ -183,9 +228,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
   },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
+  },
+  activeButton: {
+    backgroundColor: "green",
+  },
+  inactiveButton: {
+    backgroundColor: "grey",
+  },
   date: {
     fontSize: 14,
   },
+
   spinner: {
     display: "flex",
     justifyContent: "center",
