@@ -20,17 +20,28 @@ export default function SportsScreen() {
       try {
         const storedData = await getData();
         if (storedData && storedData.sports) {
-          console.log("allstore worked and was read");
+          //console.log("allstore worked and was read");
           setAllStore(storedData);
-          console.log(storedData.sports);
+          // console.log(storedData.sports);
         } else {
           console.log("allstore void or not read time to write");
           const data = await getNews("sports");
-          const newAllStore = { sports: data };
+          for (let prop in storedData) {
+            if (storedData[prop] === undefined) {
+              storedData[prop] = null;
+            }
+          }
+          const newAllStore = {
+            general: storedData.general,
+            business: data,
+            sports: data,
+            health: storedData.health,
+            technology: storedData.technology,
+          };
           setAllStore(newAllStore);
-          console.log("allstore data " + newAllStore.sports.title);
+          //console.log("allstore data " + newAllStore.sports.title);
           await storeData(newAllStore);
-          console.log("allstore data after store" + newAllStore.sports.title);
+          //console.log("allstore data after store" + newAllStore.sports.title);
         }
       } catch (error) {
         alert(error);
@@ -103,7 +114,7 @@ export default function SportsScreen() {
 
   return (
     <NativeBaseProvider>
-      <View height={850}>
+      <View height={850} style={{ backgroundColor: "white" }}>
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}

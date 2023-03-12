@@ -12,6 +12,8 @@ import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 import { getApi, storeApi, API_KEY } from "../config/config";
 
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native";
+
 console.log("aapi key is ", getApi().api);
 const countries = [
   { title: "Argentina", id: "ar" },
@@ -79,7 +81,7 @@ const SettingsScreen = () => {
   const [endpoint, setEndpoint] = useState(getEndpoint().endpoint);
   const KeyAsync = getApi().api;
   console.log("async key is", KeyAsync);
-  const [api_key, setApi_key] = useState(KeyAsync);
+  const [api_key, setApi_key] = useState("97d4da96e9c349c6a80fb1426cea7437");
 
   const [selectedCountry, setSelectedCountry] = useState("");
   function CountrySetter(item) {
@@ -107,6 +109,7 @@ const SettingsScreen = () => {
     console.log("Settings reset");
     console.log("edpoint reseted to", defaultSettings);
     const defaultApi_key = { api: API_KEY };
+    setApi_key(defaultApi_key.api);
     storeApi(defaultApi_key);
     console.log("default api key saved is", defaultApi_key);
   };
@@ -158,24 +161,30 @@ const SettingsScreen = () => {
             />
           </Picker>
         </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Country</Text>
+
           <AutocompleteDropdown
             onSelectItem={CountrySetter}
             initialValue={initialValue}
             dataSet={countries}
+            clearOnFocus={false}
+            closeOnBlur={true}
+            showClear={true}
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSaveSettings}>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleResetSettings}>
-          <Text style={styles.buttonText}>Reset to Default</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.apiButton} onPress={handleApiFetch}>
-          <Text style={styles.buttonText}>GET MY API KEY</Text>
-        </TouchableOpacity>
+        <View style={{ zIndex: -3 }}>
+          <TouchableOpacity style={styles.button} onPress={handleSaveSettings}>
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleResetSettings}>
+            <Text style={styles.buttonText}>Reset to Default</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.apiButton} onPress={handleApiFetch}>
+            <Text style={styles.buttonText}>GET MY API KEY</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </>
   );

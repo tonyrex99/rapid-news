@@ -11,8 +11,11 @@ import { getNews } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
-
+import { useColorScheme } from "react-native";
 export default function Business() {
+  const colorScheme = useColorScheme();
+  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
+
   const [allStore, setAllStore] = useState({});
 
   useEffect(() => {
@@ -26,7 +29,18 @@ export default function Business() {
         } else {
           console.log("allstore void or not read time to write");
           const data = await getNews("business");
-          const newAllStore = { business: data };
+          for (let prop in storedData) {
+            if (storedData[prop] === undefined) {
+              storedData[prop] = null;
+            }
+          }
+          const newAllStore = {
+            general: storedData.general,
+            business: data,
+            sports: storedData.sports,
+            health: storedData.health,
+            technology: storedData.technology,
+          };
           setAllStore(newAllStore);
           // console.log("allstore data " + newAllStore.business.title);
           await storeData(newAllStore);
@@ -103,7 +117,7 @@ export default function Business() {
 
   return (
     <NativeBaseProvider>
-      <View height={850}>
+      <View height={850} style={{ backgroundColor: backgroundColor }}>
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}

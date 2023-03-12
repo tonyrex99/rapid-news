@@ -22,17 +22,24 @@ export default function TechScreen() {
         if (storedData && storedData.technology) {
           console.log("allstore worked and was read");
           setAllStore(storedData);
-          console.log(storedData.technology);
         } else {
           console.log("allstore void or not read time to write");
           const data = await getNews("technology");
-          const newAllStore = { technology: data };
+          for (let prop in storedData) {
+            if (storedData[prop] === undefined) {
+              storedData[prop] = null;
+            }
+          }
+          const newAllStore = {
+            general: storedData.general,
+            business: data,
+            sports: storedData.sports,
+            health: storedData.health,
+            technology: data,
+          };
           setAllStore(newAllStore);
-          console.log("allstore data " + newAllStore.technology.title);
+
           await storeData(newAllStore);
-          console.log(
-            "allstore data after store" + newAllStore.technology.title
-          );
         }
       } catch (error) {
         alert(error);
@@ -105,7 +112,7 @@ export default function TechScreen() {
 
   return (
     <NativeBaseProvider>
-      <View height={850}>
+      <View height={850} style={{ backgroundColor: "white" }}>
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}

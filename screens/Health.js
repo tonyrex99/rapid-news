@@ -13,29 +13,61 @@ import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
 
 export default function HealthScreen() {
-  var allStore = { id: 1 };
-  allStore = getData();
-  console.log("async get " + allStore.health);
+  const [allStore, setAllStore] = useState({});
 
-  const [refreshing, setRefreshing] = React.useState(false);
-  const onRefresh = React.useCallback(() => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedData = await getData();
+        if (storedData && storedData.health) {
+          //console.log("allstore worked and was read");
+          setAllStore(storedData);
+          // console.log(storedData.health);
+        } else {
+          console.log("allstore void or not read time to write");
+          const data = await getNews("health");
+          for (let prop in storedData) {
+            if (storedData[prop] === undefined) {
+              storedData[prop] = null;
+            }
+          }
+          const newAllStore = {
+            general: storedData.general,
+            business: storedData.business,
+            health: data,
+            sports: storedData.sports,
+            technology: storedData.technology,
+          };
+          setAllStore(newAllStore);
+          //console.log("allstore data " + newAllStore.health.title);
+          await storeData(newAllStore);
+          //console.log("allstore data after store" + newAllStore.health.title);
+        }
+      } catch (error) {
+        alert(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
     setRefreshing(true);
 
-    getNews("health")
-      .then((data) => {
-        allStore.health = data;
-        console.log("allstore data" + allStore);
-        console.log("health data" + data.health);
-        setNewsData(data);
-        storeData(allStore);
-      })
-      .catch((error) => {
-        alert(error);
-      });
+    try {
+      const data = await getNews("health");
+      const newAllStore = { health: data };
+      setAllStore(newAllStore);
+      await storeData(newAllStore);
+    } catch (error) {
+      alert(error);
+    }
+
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
-  }, []);
+  };
 
   const navigation = useNavigation();
   const navfind = (item) => {
@@ -50,30 +82,11 @@ export default function HealthScreen() {
 
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedData = await getData();
-        if (storedData && storedData.health) {
-          console.log("allstore worked and was read");
-          setNewsData(storedData.health);
-          console.log(storedData.health);
-        } else {
-          console.log("allstore void or not read time to write");
-          const data = await getNews("health");
-          allStore = { health: data }; // initialize allStore with the fetched data
-          setNewsData(data);
-          console.log("allstore data " + allStore.health.title);
-
-          await storeData(allStore);
-          console.log("allstore data after store" + allStore.health.title);
-        }
-      } catch (error) {
-        alert(error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    if (allStore && allStore.health) {
+      console.log("async get " + allStore.health);
+      setNewsData(allStore.health);
+    }
+  }, [allStore]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navfind(item)}>
@@ -101,7 +114,7 @@ export default function HealthScreen() {
 
   return (
     <NativeBaseProvider>
-      <View height={850}>
+      <View height={850} style={{ backgroundColor: "white" }}>
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}

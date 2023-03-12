@@ -81,8 +81,8 @@ export async function getNews(category = "general") {
     return articles;
   } catch (error) {
     console.log("Error fetching news: ", error);
-    console.log("the erro type is", error.response.data.message);
-    throw new Error("NewsApi.org says: " + error.response.data.message);
+    console.log("the erro type is", error.response.status); //data.message);
+    throw new Error("NewsApi.org says: " + error.response.data.message); //data.message);
   }
 }
 
@@ -107,13 +107,24 @@ export async function searchNews(
 
     const response = await axios.get(
       `https://newsapi.org/v2/everything?q=${searchQuery}&from=${startDate}&to=${endDate}&sortBy=${sortBy}`,
+
       {
         headers: {
           "X-API-KEY": CURRENT_API_KEY,
         },
       }
     );
-
+    console.log(
+      "url used is " +
+        " search query: " +
+        searchQuery +
+        " stardate: " +
+        startDate +
+        " enddate: " +
+        endDate +
+        " sortby: " +
+        sortBy
+    );
     const articles = response.data.articles;
 
     // Store articles in AsyncStorage
@@ -121,9 +132,11 @@ export async function searchNews(
 
     return articles;
   } catch (error) {
-    console.log("Error fetching news: ", error);
-    console.log("the erro type is", typeof error);
-    throw new Error("Unable to retrieve news articles.");
+    console.log("Error fetching news: ", error.response.status);
+
+    // throw new Error("Unable to retrieve news articles.");
+
+    throw new Error("NewsApi.org says: " + error.response.data.message);
   }
 }
 

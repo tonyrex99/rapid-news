@@ -11,12 +11,19 @@ import {
 import { getNews, searchNews, useThemeColors } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
-import { getData, storeData } from "../config/config";
+import {
+  getData,
+  storeData,
+  getEndpoint,
+  storeEndpoint,
+} from "../config/config";
 import { SearchBar } from "@rneui/themed";
-import { useColorScheme } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Filters from "./Filters";
 import { Icon } from "@rneui/themed";
+import { StatusBar } from "expo-status-bar";
+
 export default function All() {
   const [filterOption, setFilterOption] = useState(null);
   const handleFilterChange = (option) => {
@@ -29,6 +36,7 @@ export default function All() {
   const filterOptions = ["popularity", "relevancy", "publishedAt"];
 
   const colorScheme = useColorScheme();
+  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
   const [allStore, setAllStore] = useState({});
   const colors = useThemeColors();
   useEffect(() => {
@@ -45,7 +53,19 @@ export default function All() {
         } else {
           console.log("allstore void or not read time to write");
           const data = await getNews("general");
-          const newAllStore = { general: data };
+          for (let prop in storedData) {
+            if (storedData[prop] === undefined) {
+              storedData[prop] = null;
+            }
+          }
+
+          const newAllStore = {
+            general: data,
+            business: storedData.business,
+            sports: storedData.sports,
+            health: storedData.health,
+            technology: storedData.technology,
+          };
           setAllStore(newAllStore);
           // console.log("allstore data " + newAllStore.general.title);
           await storeData(newAllStore);
@@ -78,6 +98,10 @@ export default function All() {
     } else {
       sortBy = filterOption;
     }
+    console.log("searched value: ", search);
+    console.log("Start date: ", startDate);
+    console.log("End date: ", endDate);
+    console.log("Sort by", sortBy);
     try {
       const data = await searchNews(search, startDate, endDate, sortBy);
       const newAllStore = { general: data };
@@ -90,8 +114,6 @@ export default function All() {
 
     setSearchLoad(false);
   }
-
-  var search = "general";
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -132,6 +154,7 @@ export default function All() {
 
   const [openFromDateModal, setOpenFromDateModal] = useState(false);
   const [openToDateModal, setOpenToDateModal] = useState(false);
+  const [iconColor, setIconColor] = useState("blue");
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navfind(item)}>
       <View>
@@ -190,94 +213,111 @@ export default function All() {
     setOpenToDateModal(false);
   };
   function showFilter() {
+    const startTime = Date.now(); // record start time
+
     setShowView(!showView);
+    showView == false ? setIconColor("blue") : setIconColor("black");
+    const endTime = Date.now(); // record end time
+    const elapsedTime = endTime - startTime; // calculate elapsed time
+    console.log(`Elapsed time: ${elapsedTime}ms`); // log elapsed time to console
   }
   return (
     <NativeBaseProvider>
-      <View>
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity
-            style={[
-              styles.showSearchFilterButton,
-              showView === true && styles.showSearchFilterActiveButton,
-            ]}
-            onPress={showFilter}
-          >
-            <Icon type="ionicon" name="filter" color={"black"} />
-          </TouchableOpacity>
-          <SearchBar
-            placeholder="Type Here..."
-            onChangeText={updateSearch}
-            showLoading={searchLoad}
-            lightTheme={Theme}
-            platform={"ios"}
-            value={searchValue}
-            containerStyle={{ flex: 1 }}
-          />
-        </View>
-
-        <View style={showView ? styles.visible : styles.hidden}>
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <View style={styles.filterContainer}>
-              <TouchableOpacity
-                style={styles.dateFilterButton}
-                onPress={() => setOpenFromDateModal(true)}
-              >
-                <Icon
-                  type="ionicon"
-                  name="calendar-outline"
-                  color={"#347af0"}
-                />
-                <Text> From</Text>
-              </TouchableOpacity>
-              <DateTimePickerModal
-                isVisible={openFromDateModal}
-                mode="date"
-                onConfirm={handleFromDateConfirm}
-                onCancel={hideFromDatePicker}
-              />
-              <TouchableOpacity
-                style={styles.dateFilterButton}
-                onPress={() => setOpenToDateModal(true)}
-              >
-                <Icon
-                  type="ionicon"
-                  name="calendar-outline"
-                  color={"#347af0"}
-                />
-                <Text> To</Text>
-              </TouchableOpacity>
-
-              <DateTimePickerModal
-                isVisible={openToDateModal}
-                mode="date"
-                onConfirm={handleToDateConfirm}
-                onCancel={hideToDatePicker}
-              />
-              <Filters options={filterOptions} onChange={handleFilterChange} />
-            </View>
-          </ScrollView>
-        </View>
-        <Text style={{ display: "none" }}>Selected option: {filterOption}</Text>
-      </View>
-
-      <View height={850}>
-        {newsData.length > 1 ? (
-          <FlatList
-            contentContainerStyle={flatlistStyle.container}
-            data={newsData}
-            renderItem={renderItem}
-            keyExtractor={(item) => {
-              item.title;
+      <StatusBar backgroundColor="#ffffff" barStyle="auto" />
+      <View style={{ paddingTop: 20 }}>
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              paddingTop: StatusBar.currentHeight,
             }}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-          />
-        ) : (
-          <View style={styles.spinner}>
-            <Spinner color="danger.400" />
+          >
+            <View style={[styles.showSearchFilterButton]}>
+              <TouchableOpacity onPress={showFilter}>
+                <Icon type="ionicon" name="filter" color={iconColor} />
+              </TouchableOpacity>
+            </View>
+            <SearchBar
+              placeholder="Type Here..."
+              onChangeText={updateSearch}
+              showLoading={searchLoad}
+              lightTheme={Theme}
+              platform={"ios"}
+              value={searchValue}
+              containerStyle={{ flex: 1 }}
+            />
           </View>
-        )}
+          <View style={showView ? styles.visible : styles.hidden}>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              <View style={styles.filterContainer}>
+                <TouchableOpacity
+                  style={styles.dateFilterButton}
+                  onPress={() => setOpenFromDateModal(true)}
+                >
+                  <Icon
+                    type="ionicon"
+                    name="calendar-outline"
+                    color={"#347af0"}
+                  />
+                  <Text> From</Text>
+                </TouchableOpacity>
+                <DateTimePickerModal
+                  isVisible={openFromDateModal}
+                  mode="date"
+                  onConfirm={handleFromDateConfirm}
+                  onCancel={hideFromDatePicker}
+                />
+                <TouchableOpacity
+                  style={styles.dateFilterButton}
+                  onPress={() => setOpenToDateModal(true)}
+                >
+                  <Icon
+                    type="ionicon"
+                    name="calendar-outline"
+                    color={"#347af0"}
+                  />
+                  <Text> To</Text>
+                </TouchableOpacity>
+
+                <DateTimePickerModal
+                  isVisible={openToDateModal}
+                  mode="date"
+                  onConfirm={handleToDateConfirm}
+                  onCancel={hideToDatePicker}
+                />
+                <Filters
+                  options={filterOptions}
+                  onChange={handleFilterChange}
+                />
+              </View>
+            </ScrollView>
+          </View>
+          <Text style={{ display: "none" }}>
+            Selected option: {filterOption}
+          </Text>
+        </View>
+
+        <View height={850}>
+          {newsData.length > 1 ? (
+            <FlatList
+              contentContainerStyle={flatlistStyle.container}
+              data={newsData}
+              renderItem={renderItem}
+              keyExtractor={(item) => {
+                item.title;
+              }}
+              onRefresh={onRefresh}
+              refreshing={refreshing}
+            />
+          ) : (
+            <View style={styles.spinner}>
+              <Spinner color="danger.400" />
+            </View>
+          )}
+        </View>
       </View>
     </NativeBaseProvider>
   );
@@ -306,10 +346,10 @@ const styles = StyleSheet.create({
 
   showSearchFilterButton: {
     paddingVertical: 2,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "white",
     backgroundColor: "white",
 
     flexDirection: "row",
@@ -318,10 +358,10 @@ const styles = StyleSheet.create({
   },
   showSearchFilterActiveButton: {
     paddingVertical: 2,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "white",
     backgroundColor: "#347af0",
 
     flexDirection: "row",
@@ -332,7 +372,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
   },
   newsDescription: {
     fontSize: 16,
