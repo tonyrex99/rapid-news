@@ -11,8 +11,12 @@ import { getNews } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { paddingTop } from "styled-system";
 
 export default function HealthScreen() {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top;
   const [allStore, setAllStore] = useState({});
 
   useEffect(() => {
@@ -114,7 +118,13 @@ export default function HealthScreen() {
 
   return (
     <NativeBaseProvider>
-      <View height={850} style={{ backgroundColor: "white" }}>
+      <View
+        height={850}
+        style={{
+          backgroundColor: "white",
+          paddingTop: statusBarHeight,
+        }}
+      >
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}

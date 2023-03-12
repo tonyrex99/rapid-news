@@ -23,8 +23,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Filters from "./Filters";
 import { Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function All() {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top;
   const [filterOption, setFilterOption] = useState(null);
   const handleFilterChange = (option) => {
     setFilterOption(option);
@@ -221,15 +223,16 @@ export default function All() {
     const elapsedTime = endTime - startTime; // calculate elapsed time
     console.log(`Elapsed time: ${elapsedTime}ms`); // log elapsed time to console
   }
+
   return (
     <NativeBaseProvider>
-      <StatusBar backgroundColor="#ffffff" barStyle="auto" />
-      <View style={{ paddingTop: 20 }}>
+      <StatusBar backgroundColor="#000000" style="light" />
+      <View>
         <View>
           <View
             style={{
               flexDirection: "row",
-              paddingTop: StatusBar.currentHeight,
+              paddingTop: statusBarHeight,
             }}
           >
             <View style={[styles.showSearchFilterButton]}>

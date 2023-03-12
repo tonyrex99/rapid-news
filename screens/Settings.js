@@ -12,7 +12,8 @@ import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 import { getApi, storeApi, API_KEY } from "../config/config";
 
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView } from "react-native";
+
+import * as WebBrowser from "expo-web-browser";
 
 console.log("aapi key is ", getApi().api);
 const countries = [
@@ -72,8 +73,6 @@ const countries = [
 ];
 
 const SettingsScreen = () => {
-  var convertSelectedCountry;
-  var countryObject;
   const defaultSettings = {
     endpoint: "https://newsapi.org/v2/top-headlines",
     country: "ng",
@@ -136,7 +135,10 @@ const SettingsScreen = () => {
   };
 
   function handleApiFetch() {
-    webfind("https://newsapi.org/register");
+    // webfind("https://newsapi.org/register");
+    const handlePress = async () => {
+      await WebBrowser.openBrowserAsync("https://newsapi.org/register");
+    };
   }
 
   return (
@@ -197,6 +199,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    paddingTop: 50,
   },
   title: {
     fontSize: 24,

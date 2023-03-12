@@ -24,6 +24,8 @@
     "eas": "^0.1.0",
     "expo": "~48.0.4",
     "expo-status-bar": "~1.4.4",
+    "expo-system-ui": "~2.2.1",
+    "expo-web-browser": "~12.1.1",
     "git": "^0.1.5",
     "moment": "^2.29.4",
     "native-base": "^3.4.26",

@@ -11,9 +11,13 @@ import { getNews } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Appearance } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function Business() {
-  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top;
+  const colorScheme = Appearance.getColorScheme();
+  console.log("current color scheme in business app is: " + colorScheme);
   const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
 
   const [allStore, setAllStore] = useState({});
@@ -117,7 +121,13 @@ export default function Business() {
 
   return (
     <NativeBaseProvider>
-      <View height={850} style={{ backgroundColor: backgroundColor }}>
+      <View
+        height={850}
+        style={{
+          backgroundColor: backgroundColor,
+          paddingTop: statusBarHeight,
+        }}
+      >
         {newsData.length > 1 ? (
           <FlatList
             data={newsData}
