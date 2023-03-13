@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Rad News",
-    "slug": "rarad-news",
+    "slug": "raad-news",
     "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
