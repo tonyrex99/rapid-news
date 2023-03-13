@@ -145,7 +145,7 @@ export default function All() {
 
   const [openFromDateModal, setOpenFromDateModal] = useState(false);
   const [openToDateModal, setOpenToDateModal] = useState(false);
-  const [iconColor, setIconColor] = useState("blue");
+  const [iconColor, setIconColor] = useState("black");
 
   class NewsItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
