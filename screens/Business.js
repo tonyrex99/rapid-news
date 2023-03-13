@@ -1,37 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Button } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
   Divider,
   Image,
   Spinner,
+  Skeleton,
+  ScrollView,
 } from "native-base";
 import { getNews } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { getData, storeData } from "../config/config";
-import { useColorScheme, Appearance } from "react-native";
+import { Appearance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function Business() {
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top;
   const colorScheme = Appearance.getColorScheme();
-  console.log("current color scheme in business app is: " + colorScheme);
-  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
+  const backgroundColor = colorScheme === "dark" ? "#606060" : "#fff";
 
   const [allStore, setAllStore] = useState({});
-
+  const altImage =
+    "https://cdn.w600.comps.canstockphoto.com/business-news-pictures_csp9440008.jpg ";
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedData = await getData();
         if (storedData && storedData.business) {
-          console.log("allstore worked and was read");
           setAllStore(storedData);
-          //  console.log(storedData.business);
         } else {
-          console.log("allstore void or not read time to write");
           const data = await getNews("business");
           for (let prop in storedData) {
             if (storedData[prop] === undefined) {
@@ -46,9 +51,7 @@ export default function Business() {
             technology: storedData.technology,
           };
           setAllStore(newAllStore);
-          // console.log("allstore data " + newAllStore.business.title);
           await storeData(newAllStore);
-          //console.log("allstore data after store" + newAllStore.business.title);
         }
       } catch (error) {
         alert(error);
@@ -81,7 +84,7 @@ export default function Business() {
     navigation.navigate("NewsPane", {
       title: item.title,
       description: item.content,
-      image: item.urlToImage,
+      image: item.urlToImage ? item.urlToImage : altImage,
       date: item.publishedAt,
       superLink: item.url,
     });
@@ -90,7 +93,6 @@ export default function Business() {
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
     if (allStore && allStore.business) {
-      //console.log("async get " + allStore.business);
       setNewsData(allStore.business);
     }
   }, [allStore]);
@@ -101,10 +103,10 @@ export default function Business() {
         <View style={styles.newsContainer}>
           <Image
             width={550}
-            height={250}
+            height={230}
             resizeMode={"cover"}
             source={{
-              uri: item.urlToImage,
+              uri: item.urlToImage ? item.urlToImage : altImage,
             }}
             alt="Alternate Text"
           />
@@ -118,6 +120,80 @@ export default function Business() {
       </View>
     </TouchableOpacity>
   );
+  const RenderSkeleton = () => {
+    return (
+      <View>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+          <Spinner color="danger.400" />
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
 
   return (
     <NativeBaseProvider>
@@ -137,9 +213,9 @@ export default function Business() {
             refreshing={refreshing}
           />
         ) : (
-          <View style={styles.spinner}>
-            <Spinner color="danger.400" />
-          </View>
+          <>
+            <RenderSkeleton />
+          </>
         )}
       </View>
     </NativeBaseProvider>

@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
+  ScrollView,
   Divider,
   Image,
   Spinner,
+  Skeleton,
 } from "native-base";
 import { getNews } from "../services/services";
 import moment from "moment";
@@ -14,6 +22,8 @@ import { getData, storeData } from "../config/config";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TechScreen() {
+  const altImage =
+    "https://st4.depositphotos.com/1152339/20043/i/1600/depositphotos_200433334-stock-photo-news-concept-tech-news-on.jpg";
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top;
   const [allStore, setAllStore] = useState({});
@@ -23,10 +33,8 @@ export default function TechScreen() {
       try {
         const storedData = await getData();
         if (storedData && storedData.technology) {
-          console.log("allstore worked and was read");
           setAllStore(storedData);
         } else {
-          console.log("allstore void or not read time to write");
           const data = await getNews("technology");
           for (let prop in storedData) {
             if (storedData[prop] === undefined) {
@@ -75,7 +83,7 @@ export default function TechScreen() {
     navigation.navigate("NewsPane", {
       title: item.title,
       description: item.content,
-      image: item.urlToImage,
+      image: item.urlToImage ? item.urlToImage : altImage,
       date: item.publishedAt,
       superLink: item.url,
     });
@@ -84,7 +92,6 @@ export default function TechScreen() {
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
     if (allStore && allStore.technology) {
-      console.log("async get " + allStore.technology);
       setNewsData(allStore.technology);
     }
   }, [allStore]);
@@ -98,7 +105,7 @@ export default function TechScreen() {
             height={250}
             resizeMode={"cover"}
             source={{
-              uri: item.urlToImage,
+              uri: item.urlToImage ? item.urlToImage : altImage,
             }}
             alt="Alternate Text"
           />
@@ -112,6 +119,80 @@ export default function TechScreen() {
       </View>
     </TouchableOpacity>
   );
+  const RenderSkeleton = () => {
+    return (
+      <View>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+          <Spinner color="danger.400" />
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
 
   return (
     <NativeBaseProvider>
@@ -128,9 +209,9 @@ export default function TechScreen() {
             refreshing={refreshing}
           />
         ) : (
-          <View style={styles.spinner}>
-            <Spinner color="danger.400" />
-          </View>
+          <>
+            <RenderSkeleton />
+          </>
         )}
       </View>
     </NativeBaseProvider>
@@ -157,6 +238,10 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: 400,
+
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });

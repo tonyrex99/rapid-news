@@ -15,7 +15,6 @@ import { useNavigation } from "@react-navigation/native";
 
 import * as WebBrowser from "expo-web-browser";
 
-console.log("aapi key is ", getApi().api);
 const countries = [
   { title: "Argentina", id: "ar" },
   { title: "Australia", id: "au" },
@@ -78,25 +77,26 @@ const SettingsScreen = () => {
     country: "ng",
   };
   const [endpoint, setEndpoint] = useState(getEndpoint().endpoint);
+  const [selectedValue, setselectedValue] = useState(endpoint);
   const KeyAsync = getApi().api;
-  console.log("async key is", KeyAsync);
-  const [api_key, setApi_key] = useState("97d4da96e9c349c6a80fb1426cea7437");
+  const [api_key, setApi_key] = useState(getApi().api_key);
+  const [initialValue, setInitialValue] = useState(getInitialCountry());
 
   const [selectedCountry, setSelectedCountry] = useState("");
   function CountrySetter(item) {
     if (item) {
       setSelectedCountry(item.title);
-      console.log(item.title);
     }
   }
 
   const handleSubmit = () => {
     const UserProfile = { endpoint: endpoint, country: selectedCountry };
-    console.log("Userprofile settings to be saved", UserProfile);
     storeEndpoint(UserProfile);
     const UserApi = { api: api_key };
-    console.log("api key to be stored ", UserApi);
     storeApi(UserApi);
+    setApi_key(api_key);
+    setselectedValue(endpoint);
+    setInitialValue(selectedCountry);
   };
 
   const handleSaveSettings = () => {
@@ -105,20 +105,18 @@ const SettingsScreen = () => {
 
   const handleResetSettings = () => {
     storeEndpoint(defaultSettings);
-    console.log("Settings reset");
-    console.log("edpoint reseted to", defaultSettings);
     const defaultApi_key = { api: API_KEY };
     setApi_key(defaultApi_key.api);
+    setselectedValue(defaultApi_key.endpoint);
+    setInitialValue(defaultSettings.country);
     storeApi(defaultApi_key);
-    console.log("default api key saved is", defaultApi_key);
   };
 
   const handleEndpointChange = (value) => {
     setEndpoint(value);
-    console.log(endpoint);
+    setselectedValue(value);
   };
 
-  const initialValue = getInitialCountry();
   function getInitialCountry() {
     return getEndpoint().country ? getEndpoint().country : "ng";
   }
@@ -134,11 +132,8 @@ const SettingsScreen = () => {
     });
   };
 
-  function handleApiFetch() {
-    // webfind("https://newsapi.org/register");
-    const handlePress = async () => {
-      await WebBrowser.openBrowserAsync("https://newsapi.org/register");
-    };
+  async function handleApiFetch() {
+    await WebBrowser.openBrowserAsync("https://newsapi.org/register");
   }
 
   return (
@@ -152,7 +147,7 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>API Endpoint</Text>
           <Picker
-            selectedValue={endpoint}
+            selectedValue={selectedValue}
             onValueChange={handleEndpointChange}
             mode="dropdown"
           >

@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Button } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
@@ -7,18 +13,14 @@ import {
   Image,
   Spinner,
   ScrollView,
+  Skeleton,
 } from "native-base";
 import { getNews, searchNews, useThemeColors } from "../services/services";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
-import {
-  getData,
-  storeData,
-  getEndpoint,
-  storeEndpoint,
-} from "../config/config";
+import { getData, storeData } from "../config/config";
 import { SearchBar } from "@rneui/themed";
-import { Appearance, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Filters from "./Filters";
 import { Icon } from "@rneui/themed";
@@ -34,8 +36,9 @@ export default function All() {
 
     // perform other actions based on the selected filter option
   };
-
-  const filterOptions = ["popularity", "relevancy", "publishedAt"];
+  const altImage =
+    "https://media.istockphoto.com/id/540113610/vector/breaking-news-newspaper.jpg?s=612x612&w=0&k=20&c=ooJw5_ROQBHL1DHNUUcQIc-Kf6fH49XlbvfyPtHdu30=";
+  const filterOptions = ["Popularity", "Relevancy", "PublishedAt"];
 
   const colorScheme = useColorScheme();
   const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
@@ -45,15 +48,10 @@ export default function All() {
     const fetchData = async () => {
       try {
         setTheme(resolveTheme());
-        console.log("resolvethem is", resolveTheme());
-        console.log("resolvethem is", typeof resolveTheme());
         const storedData = await getData();
         if (storedData && storedData.general) {
-          console.log("allstore worked and was read");
           setAllStore(storedData);
-          //console.log(storedData.general);
         } else {
-          console.log("allstore void or not read time to write");
           const data = await getNews("general");
           for (let prop in storedData) {
             if (storedData[prop] === undefined) {
@@ -69,9 +67,7 @@ export default function All() {
             technology: storedData.technology,
           };
           setAllStore(newAllStore);
-          // console.log("allstore data " + newAllStore.general.title);
           await storeData(newAllStore);
-          //console.log("allstore data after store" + newAllStore.general.title);
         }
       } catch (error) {
         alert(error);
@@ -100,16 +96,12 @@ export default function All() {
     } else {
       sortBy = filterOption;
     }
-    console.log("searched value: ", search);
-    console.log("Start date: ", startDate);
-    console.log("End date: ", endDate);
-    console.log("Sort by", sortBy);
+
     try {
       const data = await searchNews(search, startDate, endDate, sortBy);
       const newAllStore = { general: data };
       setAllStore(newAllStore);
       await storeData(newAllStore);
-      console.log("search updated");
     } catch (error) {
       alert(error);
     }
@@ -140,7 +132,7 @@ export default function All() {
     navigation.navigate("NewsPane", {
       title: item.title,
       description: item.content,
-      image: item.urlToImage,
+      image: item.urlToImage ? item.urlToImage : altImage,
       date: item.publishedAt,
       superLink: item.url,
     });
@@ -149,7 +141,6 @@ export default function All() {
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
     if (allStore && allStore.general) {
-      console.log("async get " + allStore.general);
       setNewsData(allStore.general);
     }
   }, [allStore]);
@@ -157,47 +148,131 @@ export default function All() {
   const [openFromDateModal, setOpenFromDateModal] = useState(false);
   const [openToDateModal, setOpenToDateModal] = useState(false);
   const [iconColor, setIconColor] = useState("blue");
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navfind(item)}>
+
+  class NewsItem extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+      // Only re-render if the item prop has changed
+      return nextProps.item !== this.props.item;
+    }
+
+    render() {
+      const { item, navfind } = this.props;
+
+      return (
+        <TouchableOpacity onPress={() => navfind(item)}>
+          <View>
+            <View style={styles.newsContainer}>
+              <Image
+                width={550}
+                height={250}
+                resizeMode={"cover"}
+                source={{
+                  uri: item.urlToImage ? item.urlToImage : altImage,
+                }}
+                alt="Alternate Text"
+              />
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.date}>
+                {moment(item.publishedAt).format("LLL")}
+              </Text>
+              <Text style={styles.newsDescription}>{item.description}</Text>
+            </View>
+            <Divider my={2} bg="#e0e0e0" />
+          </View>
+        </TouchableOpacity>
+      );
+    }
+  }
+
+  const RenderSkeleton = () => {
+    return (
       <View>
-        <View style={styles.newsContainer}>
-          <Image
-            width={550}
-            height={250}
-            resizeMode={"cover"}
-            source={{
-              uri: item.urlToImage,
-            }}
-            alt="Alternate Text"
-          />
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.date}>
-            {moment(item.publishedAt).format("LLL")}
-          </Text>
-          <Text style={styles.newsDescription}>{item.description}</Text>
-        </View>
-        <Divider my={2} bg="#e0e0e0" />
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+          <Spinner color="danger.400" />
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+        </ScrollView>
       </View>
-    </TouchableOpacity>
-  );
-  const flatlistStyle = StyleSheet.create({
-    container: { backgroundColor: colors.background },
-  });
+    );
+  };
+
   const [Theme, setTheme] = useState(true);
   function resolveTheme() {
     var searchtheme = colorScheme;
-    console.log("colorscheme is" + searchtheme);
     if (searchtheme == "light") {
       return true;
     } else {
       return false;
     }
   }
+
   const [showView, setShowView] = useState(true);
   const handleFromDateConfirm = (date) => {
     var finalDate = moment(date).format("YYYY-DD-MM");
     setStartDate(finalDate);
-    console.log("startdate ", finalDate);
     hideFromDatePicker();
     updateSearch(searchValue);
   };
@@ -205,7 +280,6 @@ export default function All() {
     var finalEndDate = moment(date).format("YYYY-DD-MM");
     setEndDate(finalEndDate);
     hideToDatePicker();
-    console.log("enddate ", finalEndDate);
     updateSearch(searchValue);
   };
   const hideFromDatePicker = () => {
@@ -215,20 +289,15 @@ export default function All() {
     setOpenToDateModal(false);
   };
   function showFilter() {
-    const startTime = Date.now(); // record start time
-
     setShowView(!showView);
     showView == false ? setIconColor("blue") : setIconColor("black");
-    const endTime = Date.now(); // record end time
-    const elapsedTime = endTime - startTime; // calculate elapsed time
-    console.log(`Elapsed time: ${elapsedTime}ms`); // log elapsed time to console
   }
 
   return (
     <NativeBaseProvider>
       <StatusBar backgroundColor="#000000" style="light" />
       <View>
-        <View>
+        <View style={{ backgroundColor: "white" }}>
           <View
             style={{
               flexDirection: "row",
@@ -263,9 +332,9 @@ export default function All() {
                   <Icon
                     type="ionicon"
                     name="calendar-outline"
-                    color={"#347af0"}
+                    color={"#000000"}
                   />
-                  <Text> From</Text>
+                  <Text style={{ color: "#000000" }}> From</Text>
                 </TouchableOpacity>
                 <DateTimePickerModal
                   isVisible={openFromDateModal}
@@ -280,9 +349,9 @@ export default function All() {
                   <Icon
                     type="ionicon"
                     name="calendar-outline"
-                    color={"#347af0"}
+                    color={"#000000"}
                   />
-                  <Text> To</Text>
+                  <Text style={{ color: "#000000" }}> To</Text>
                 </TouchableOpacity>
 
                 <DateTimePickerModal
@@ -306,19 +375,18 @@ export default function All() {
         <View height={850}>
           {newsData.length > 1 ? (
             <FlatList
-              contentContainerStyle={flatlistStyle.container}
               data={newsData}
-              renderItem={renderItem}
-              keyExtractor={(item) => {
-                item.title;
-              }}
+              renderItem={({ item }) => (
+                <NewsItem item={item} navfind={navfind} />
+              )}
+              keyExtractor={(item) => item.id}
               onRefresh={onRefresh}
               refreshing={refreshing}
             />
           ) : (
-            <View style={styles.spinner}>
-              <Spinner color="danger.400" />
-            </View>
+            <>
+              <RenderSkeleton />
+            </>
           )}
         </View>
       </View>
@@ -340,8 +408,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "white",
+    borderColor: "#dedede",
+    backgroundColor: "#f2f2f2",
     marginRight: 10,
     flexDirection: "row",
     alignItems: "center",

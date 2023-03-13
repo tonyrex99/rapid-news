@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "white",
+    borderColor: "#dedede",
+    backgroundColor: "#f2f2f2",
     marginRight: 10,
   },
   activeOptionButton: {
-    backgroundColor: "#347af0",
-    borderColor: "#347af0",
+    backgroundColor: "#606060",
+    borderColor: "#8c8c8c",
   },
   optionText: {
     color: "#333",

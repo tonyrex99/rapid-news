@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import {
   NativeBaseProvider,
   FlatList,
   Divider,
   Image,
   Spinner,
+  Skeleton,
+  ScrollView,
 } from "native-base";
 import { getNews } from "../services/services";
 import moment from "moment";
@@ -17,17 +25,15 @@ export default function SportsScreen() {
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top;
   const [allStore, setAllStore] = useState({});
-
+  const altImage =
+    "https://cdn.vectorstock.com/i/1000x1000/44/74/sports-news-soccer-concept-background-vector-37384474.webp";
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedData = await getData();
         if (storedData && storedData.sports) {
-          //console.log("allstore worked and was read");
           setAllStore(storedData);
-          // console.log(storedData.sports);
         } else {
-          console.log("allstore void or not read time to write");
           const data = await getNews("sports");
           for (let prop in storedData) {
             if (storedData[prop] === undefined) {
@@ -42,9 +48,7 @@ export default function SportsScreen() {
             technology: storedData.technology,
           };
           setAllStore(newAllStore);
-          //console.log("allstore data " + newAllStore.sports.title);
           await storeData(newAllStore);
-          //console.log("allstore data after store" + newAllStore.sports.title);
         }
       } catch (error) {
         alert(error);
@@ -77,7 +81,7 @@ export default function SportsScreen() {
     navigation.navigate("NewsPane", {
       title: item.title,
       description: item.content,
-      image: item.urlToImage,
+      image: item.urlToImage ? item.urlToImage : altImage,
       date: item.publishedAt,
       superLink: item.url,
     });
@@ -86,7 +90,6 @@ export default function SportsScreen() {
   const [newsData, setNewsData] = useState([]);
   useEffect(() => {
     if (allStore && allStore.sports) {
-      console.log("async get " + allStore.sports);
       setNewsData(allStore.sports);
     }
   }, [allStore]);
@@ -97,10 +100,10 @@ export default function SportsScreen() {
         <View style={styles.newsContainer}>
           <Image
             width={550}
-            height={250}
+            height={210}
             resizeMode={"cover"}
             source={{
-              uri: item.urlToImage,
+              uri: item.urlToImage ? item.urlToImage : altImage,
             }}
             alt="Alternate Text"
           />
@@ -114,6 +117,80 @@ export default function SportsScreen() {
       </View>
     </TouchableOpacity>
   );
+  const RenderSkeleton = () => {
+    return (
+      <View>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+          <Spinner color="danger.400" />
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+
+          <View style={styles.newsContainer}>
+            {/* Skeleton image */}
+            <Skeleton height={210} marginTop={15} />
+            {/* Skeleton Title*/}
+            <Skeleton height={4} width={300} marginTop={3} marginBottom={0.5} />
+            <Skeleton
+              height={4}
+              width={330}
+              marginTop={0.5}
+              marginBottom={0.5}
+            />
+            <Skeleton height={4} width={250} marginTop={0.5} marginBottom={2} />
+            {/* Skeleton Date */}
+            <Skeleton height={2} width={150} marginBottom={1} />
+
+            {/* Skeleton Description */}
+            <Skeleton height={2} width={300} marginTop={5} />
+            <Skeleton height={2} width={250} marginTop={1} />
+            <Skeleton height={2} width={210} marginTop={1} />
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
 
   return (
     <NativeBaseProvider>
@@ -130,9 +207,9 @@ export default function SportsScreen() {
             refreshing={refreshing}
           />
         ) : (
-          <View style={styles.spinner}>
-            <Spinner color="danger.400" />
-          </View>
+          <>
+            <RenderSkeleton />
+          </>
         )}
       </View>
     </NativeBaseProvider>

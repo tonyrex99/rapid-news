@@ -54,7 +54,7 @@ export default function NewsPane({ route }) {
           <Text style={styles.date}> {moment(date).format("LLL")}</Text>
           <Image
             width={550}
-            height={250}
+            height={300}
             resizeMode={"cover"}
             source={{
               uri: image,
