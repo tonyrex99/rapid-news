@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   TouchableOpacity,
@@ -25,10 +25,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Filters from "./Filters";
 import { Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 export default function All() {
-  const insets = useSafeAreaInsets();
-  const statusBarHeight = insets.top;
   const [filterOption, setFilterOption] = useState(null);
   const handleFilterChange = (option) => {
     setFilterOption(option);
@@ -293,6 +291,24 @@ export default function All() {
     showView == false ? setIconColor("blue") : setIconColor("black");
   }
 
+  const flatListRef = useRef(null);
+
+  const scrollToTop = (flatListRef) => {
+    flatListRef.scrollToOffset({ animated: true, offset: 0 });
+  };
+  const handleButtonPress = () => {
+    scrollToTop(flatListRef.current);
+  };
+
+  const renderButton = () => {
+    return (
+      <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
+        <Text style={styles.buttonText}>Scroll to top</Text>
+      </TouchableOpacity>
+    );
+
+    return null;
+  };
   return (
     <NativeBaseProvider>
       <StatusBar backgroundColor="#000000" style="light" />
@@ -301,7 +317,7 @@ export default function All() {
           <View
             style={{
               flexDirection: "row",
-              paddingTop: statusBarHeight,
+              paddingTop: 26,
             }}
           >
             <View style={[styles.showSearchFilterButton]}>
@@ -380,14 +396,21 @@ export default function All() {
                 <NewsItem item={item} navfind={navfind} />
               )}
               keyExtractor={(item) => item.id}
+              initialNumToRender={100}
+              windowSize={20}
+              shouldItemUpdate={(props, nextProps) => {
+                return props.item !== nextProps.item;
+              }}
               onRefresh={onRefresh}
               refreshing={refreshing}
+              ref={flatListRef}
             />
           ) : (
             <>
               <RenderSkeleton />
             </>
           )}
+          {renderButton()}
         </View>
       </View>
     </NativeBaseProvider>
@@ -397,6 +420,8 @@ export default function All() {
 const styles = StyleSheet.create({
   newsContainer: {
     padding: 10,
+    position: "relative",
+    flex: 1,
   },
   title: {
     fontSize: 18,
@@ -462,5 +487,18 @@ const styles = StyleSheet.create({
   },
   hidden: {
     display: "none",
+  },
+  button: {
+    position: "absolute",
+    bottom: 370,
+    right: 10,
+    zIndex: 9999,
+    backgroundColor: "blue",
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
