@@ -86,25 +86,29 @@ export default function All() {
   // Create a new Date object
 
   async function updateSearch(search) {
-    var sortBy;
-    setSearchLoad(true);
-    setSearchValue(search);
-    if (filterOption == null) {
-      sortBy = "popularity";
+    if (search === null || search === undefined || search === 0) {
+      onRefresh();
     } else {
-      sortBy = filterOption;
-    }
+      var sortBy;
+      setSearchLoad(true);
+      setSearchValue(search);
+      if (filterOption == null) {
+        sortBy = "popularity";
+      } else {
+        sortBy = filterOption;
+      }
 
-    try {
-      const data = await searchNews(search, startDate, endDate, sortBy);
-      const newAllStore = { general: data };
-      setAllStore(newAllStore);
-      await storeData(newAllStore);
-    } catch (error) {
-      alert(error);
-    }
+      try {
+        const data = await searchNews(search, startDate, endDate, sortBy);
+        const newAllStore = { general: data };
+        setAllStore(newAllStore);
+        await storeData(newAllStore);
+      } catch (error) {
+        alert(error);
+      }
 
-    setSearchLoad(false);
+      setSearchLoad(false);
+    }
   }
 
   const [refreshing, setRefreshing] = useState(false);
