@@ -267,7 +267,7 @@ export default function All() {
     }
   }
 
-  const [showView, setShowView] = useState(true);
+  const [showView, setShowView] = useState(false);
   const handleFromDateConfirm = (date) => {
     var finalDate = moment(date).format("YYYY-DD-MM");
     setStartDate(finalDate);
@@ -410,7 +410,7 @@ export default function All() {
               <RenderSkeleton />
             </>
           )}
-          {renderButton()}
+          {newsData.length > 1 ? renderButton() : null}
         </View>
       </View>
     </NativeBaseProvider>
