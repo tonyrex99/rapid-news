@@ -38,7 +38,7 @@ jobs:
             ./dist/*.apk
           tag: ${{ github.sha }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Build Web Version
         run: |
@@ -48,7 +48,7 @@ jobs:
       - name: Deploy Web Version to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           publish_dir: ./dist
 
   deploy:
