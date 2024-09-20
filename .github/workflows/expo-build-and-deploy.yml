@@ -1,15 +1,23 @@
-name: update
-on: push
+name: Build and Deploy React Native App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  update:
-    name: EAS Update
+  build_and_release:
+    name: Build and Release APK + Deploy Web
     runs-on: ubuntu-latest
     steps:
-      - name: Check for EXPO_TOKEN
+      - name: Check for EXPO_TOKEN and GH_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
             echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GH_TOKEN }}" ]; then
+            echo "You must provide a GH_TOKEN secret for publishing to GitHub releases."
             exit 1
           fi
 
@@ -31,5 +39,41 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Publish update
-        run: eas update --auto
+      # Step 1: Build APK
+      - name: Build APK using EAS
+        run: |
+          eas build -p android --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get APK download URL
+        id: get_apk_url
+        run: |
+          APK_URL=$(eas build:list --json | jq -r '.[0].artifacts.buildUrl')
+          echo "APK_URL=$APK_URL" >> $GITHUB_ENV
+
+      - name: Download APK
+        run: |
+          curl -L ${{ env.APK_URL }} -o app-release.apk
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app-release.apk
+          tag_name: ${{ github.sha }}  # You can modify this for a custom tag
+          name: "Release ${{ github.sha }}"
+          body: "EAS build Android APK"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # Step 2: Build Web version and deploy to GitHub Pages
+      - name: Build Web version
+        run: yarn expo export:web
+
+      - name: Deploy Web version to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.GH_TOKEN }}
+          publish_dir: ./web-build
